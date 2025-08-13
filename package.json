@@ -1,0 +1,8 @@
+{
+  "name": "levon-interest-aptitude",
+  "version": "1.0.0",
+  "description": "Interactive interest and aptitude explorer",
+  "scripts": {
+    "test": "echo 'No tests specified'"
+  }
+}
