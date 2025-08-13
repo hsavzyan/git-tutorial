@@ -50,6 +50,17 @@
                 <div class="results-section">
                     <h2>Your Results 🎉</h2>
                     <div id="resultsContent"></div>
+                    <div class="result-tools">
+                      <button class="tool-button" onclick="generateParentBrief()">Parent summary</button>
+                      <button class="tool-button" onclick="downloadJSON()">Export JSON</button>
+                      <button class="tool-button" onclick="downloadCSV()">Export CSV</button>
+                      <button class="tool-button" onclick="downloadItemBank()">Download item bank</button>
+
+                      <label class="tool-upload">
+                        <input type="file" id="importFile" accept="application/json" onchange="importJSON(this.files[0])">
+                        Import JSON
+                      </label>
+                    </div>
                     <button class="print-button" onclick="printResults()">Print/Save Results</button>
                 </div>
             </div>
