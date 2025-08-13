@@ -132,7 +132,11 @@ const testData = {
             description: 'How often do these describe you?',
             scale: ['Never', 'Rarely', 'Sometimes', 'Often', 'Always'],
             questions: [
-                { id: 'C-VAL-01', text: 'I enjoy working with a team toward a shared goal', casel: 'relationship' },
+                { id: 'C-VAL-01',
+                  text: 'I enjoy working with a team toward a shared goal',
+                  casel: 'relationship',
+                  clusters: { S: 0.5, E: 0.25 }
+                },
                 { id: 'C-VAL-02', text: 'I keep trying when a task is challenging', casel: 'self_management' },
                 { id: 'C-VAL-03', text: 'I take a pause when upset and then respond calmly', casel: 'self_management' },
                 { id: 'C-VAL-04', text: 'I listen to others\' ideas and try to understand them', casel: 'social_awareness' },

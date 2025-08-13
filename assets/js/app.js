@@ -225,7 +225,10 @@ function renderOptionalModule() {
                 subsection.scale.forEach((label, idx) => {
                     const isSelected = responses[q.id] === idx;
                     html += `
-                            <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>
+                            <div class="scale-option ${isSelected ? 'selected' : ''}"
+                                 tabindex="0" role="radio" aria-checked="${isSelected}"
+                                 onclick="selectScale('${q.id}', ${idx})"
+                                 onkeydown="if(event.key==='Enter'||event.key===' '){selectScale('${q.id}', ${idx})}">${label}</div>
                     `;
                 });
                 html += `</div></div>`;
@@ -242,7 +245,10 @@ function renderOptionalModule() {
             q.options.forEach((opt, idx) => {
                 const isSelected = responses[q.id] === idx;
                 html += `
-                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">
+                        <div class="mcq-option ${isSelected ? 'selected' : ''}"
+                             tabindex="0" role="radio" aria-checked="${isSelected}"
+                             onclick="selectMCQ('${q.id}', ${idx})"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){selectMCQ('${q.id}', ${idx})}">
                             <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
                             <span>${opt}</span>
                         </div>
@@ -265,7 +271,10 @@ function renderOptionalModule() {
             q.options.forEach((opt, idx) => {
                 const isSelected = responses[q.id] === idx;
                 html += `
-                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">
+                        <div class="mcq-option ${isSelected ? 'selected' : ''}"
+                             tabindex="0" role="radio" aria-checked="${isSelected}"
+                             onclick="selectMCQ('${q.id}', ${idx})"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){selectMCQ('${q.id}', ${idx})}">
                             <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
                             <span>${opt}</span>
                         </div>
@@ -303,7 +312,10 @@ function renderOptionalModule() {
             module.scale.forEach((label, idx) => {
                 const isSelected = responses[q.id] === idx;
                 html += `
-                        <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>
+                        <div class="scale-option ${isSelected ? 'selected' : ''}"
+                             tabindex="0" role="radio" aria-checked="${isSelected}"
+                             onclick="selectScale('${q.id}', ${idx})"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){selectScale('${q.id}', ${idx})}">${label}</div>
                 `;
             });
             html += `</div></div>`;
@@ -425,7 +437,10 @@ function renderSection() {
             q.options.forEach((opt, idx) => {
                 const isSelected = responses[q.id] === idx;
                 html += `
-                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">
+                        <div class="mcq-option ${isSelected ? 'selected' : ''}"
+                             tabindex="0" role="radio" aria-checked="${isSelected}"
+                             onclick="selectMCQ('${q.id}', ${idx})"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){selectMCQ('${q.id}', ${idx})}">
                             <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
                             <span>${opt}</span>
                         </div>
@@ -444,7 +459,10 @@ function renderSection() {
             section.scale.forEach((label, idx) => {
                 const isSelected = responses[q.id] === idx;
                 html += `
-                        <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>
+                        <div class="scale-option ${isSelected ? 'selected' : ''}"
+                             tabindex="0" role="radio" aria-checked="${isSelected}"
+                             onclick="selectScale('${q.id}', ${idx})"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){selectScale('${q.id}', ${idx})}">${label}</div>
                 `;
             });
             html += `</div></div>`;
@@ -551,6 +569,13 @@ function previousSection() {
 
 function printResults() {
     window.print();
+}
+
+function addMoreModules() {
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('moduleSelection').classList.add('active');
+  savePhase('module_select');
+  window.scrollTo(0, 0);
 }
 
 function calculateScores() {
@@ -727,30 +752,47 @@ function downloadCSV() {
     URL.revokeObjectURL(a.href);
 }
 
-function importJSON(evt) {
-    const file = evt.target.files && evt.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-        try {
-            const data = JSON.parse(reader.result);
-            if (data.responses) {
-                responses = data.responses;
-                localStorage.setItem('levonTestResponses', JSON.stringify(responses));
-            }
-            if (Array.isArray(data.selectedModules)) {
-                selectedModules = data.selectedModules;
-                localStorage.setItem('levonSelectedModules', JSON.stringify(selectedModules));
-            }
-            alert('Import complete. You can resume or view results.');
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById('welcome').classList.add('active');
-            document.getElementById('resumeBtn').style.display = 'inline-block';
-        } catch(e) {
-            alert('Could not import that file. Make sure it is a JSON export from this site.');
-        }
-    };
-    reader.readAsText(file);
+function importJSON(arg) {
+  let file = null;
+  // Allow both patterns: importJSON(event) and importJSON(file)
+  if (arg && arg.target && arg.target.files && arg.target.files[0]) {
+    file = arg.target.files[0];
+  } else if (arg instanceof File) {
+    file = arg;
+  }
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (data.responses) {
+        responses = data.responses;
+        localStorage.setItem('levonTestResponses', JSON.stringify(responses));
+      }
+      if (Array.isArray(data.selectedModules)) {
+        selectedModules = data.selectedModules;
+        localStorage.setItem('levonSelectedModules', JSON.stringify(selectedModules));
+      }
+      if (typeof data.phase === 'string') {
+        savePhase(data.phase);
+      }
+      alert('Import complete. You can resume or jump to Results.');
+      // Refresh current view sensibly
+      if (phase === 'module_select') {
+        document.getElementById('moduleSelection').classList.add('active');
+        updateProgress();
+      } else if (phase === 'modules') {
+        inOptionalModules = true;
+        renderOptionalModule();
+      } else {
+        renderSection();
+      }
+    } catch (e) {
+      alert('Sorry—could not read that file. Is it a valid JSON export from this tool?');
+    }
+  };
+  reader.readAsText(file);
 }
 
 function downloadItemBank() {
@@ -798,18 +840,92 @@ function downloadItemBank() {
 }
 
 function generateParentBrief() {
-    const scores = calculateScores();
-    const selInfo = analyzeSEL();
-    const band = studyBand(scores.habits);
-    const sortedClusters = Object.entries(scores.clusters).sort((a,b)=>b[1]-a[1]);
-    const top2 = sortedClusters.slice(0,2);
-    const topH = Object.entries(scores.humanities).sort((a,b)=>b[1]-a[1]).slice(0,2);
-    const clusterNames = { I:'Analytical-Investigative', AV:'Artistic-Verbal', S:'Social-Helping', R:'Practical-Maker', E:'Enterprising-Initiator', C:'Organized-Detail' };
-    const humanitiesNames = { HLIT:'Reading & Literature', HCIV:'History & Civics', HLANG:'Languages', HAM:'Arts & Media' };
-    const briefWindow = window.open('', 'ParentBrief', 'width=800,height=1000');
-    const briefDoc = briefWindow.document;
-    briefDoc.write(`<!DOCTYPE html><html><head><title>Parent Brief - Levon's Interest & Aptitude Results</title><style>body{font-family:Arial,sans-serif;max-width:700px;margin:20px auto;line-height:1.5}h1{color:#667eea;font-size:1.5em;border-bottom:2px solid #667eea;padding-bottom:10px}h2{color:#333;font-size:1.2em;margin-top:20px}.summary-box{background:#f8f9fa;padding:15px;border-radius:8px;margin:15px 0}.scores{display:flex;justify-content:space-between;flex-wrap:wrap}.score-item{flex:0 0 48%;margin-bottom:10px}.action-item{background:#e8f4fd;padding:10px;margin:5px 0;border-left:3px solid #667eea}@media print{body{margin:10px}.no-print{display:none}}</style></head><body><h1>Interest & Aptitude Results - ${new Date().toLocaleDateString()}</h1><div class="summary-box"><h2>Top Interest Patterns</h2><div class="scores"><div class="score-item"><strong>${clusterNames[top2[0][0]]}:</strong> ${Math.round(top2[0][1])}%</div><div class="score-item"><strong>${clusterNames[top2[1][0]]}:</strong> ${Math.round(top2[1][1])}%</div></div><p style="margin-top:10px;font-size:0.9em;">These reflect current interests, not fixed traits. Use them to choose low-stakes experiments.</p></div><div class="summary-box"><h2>Quick Snapshot</h2><p><strong>Humanities:</strong> ${humanitiesNames[topH[0][0]]} (${Math.round(topH[0][1])}%), ${humanitiesNames[topH[1][0]]} (${Math.round(topH[1][1])}%)</p><p><strong>Skills:</strong> Verbal ${scores.aptitude.verbal}/4 • Logic ${scores.aptitude.logic}/4 • Data ${scores.aptitude.data}/2</p><p><strong>Study Habits:</strong> ${band.label}</p><p><strong>SEL:</strong> ${selInfo.strengths.length ? selInfo.strengths.join(', ') : 'Emerging'}${selInfo.focus ? ` • Focus: ${selInfo.focus}` : ''}</p></div><h2>This Week's Actions</h2><div class="action-item"><strong>Monday:</strong> Review results together. Pick ONE micro-project from interests. Define "done" in 1-2 sentences.</div><div class="action-item"><strong>Wednesday:</strong> 30-minute work session. Provide tools/space. Ask: "What's working? Any blocks?"</div><div class="action-item"><strong>Friday:</strong> Share progress with someone outside household. Celebrate effort, not just outcome.</div><h2>Home Support Tips</h2><ul><li>Start small: 15-20 minute sessions with clear endpoints</li><li>Model curiosity: "I wonder why..." instead of "You should know..."</li><li>Praise process: "You organized that well" vs "You're so smart"</li><li>Create low-friction access to tools (notebooks, apps, materials)</li></ul><h2>Watch For</h2><ul><li>Perfectionism blocking start → Set "good enough" versions</li><li>All-or-nothing thinking → Celebrate small wins</li><li>Comparison to others → Focus on personal growth</li></ul><div class="summary-box" style="margin-top:30px;"><p><strong>Remember:</strong> This is exploration, not evaluation. Interests evolve. Skills develop with practice. The goal is engagement, not achievement.</p></div><p style="text-align:center;margin-top:40px;color:#999;font-size:0.9em;">Generated from Levon's Interest & Aptitude Orientation • Private & Local</p><div class="no-print" style="text-align:center;margin-top:20px;"><button onclick="window.print()" style="padding:10px 20px;background:#667eea;color:white;border:none;border-radius:5px;cursor:pointer;">Print This Brief</button></div></body></html>`);
-    briefDoc.close();
+  const scores = calculateScores();
+  const band = studyBand(scores.habits);
+  const sortedClusters = Object.entries(scores.clusters).sort((a,b)=>b[1]-a[1]);
+  const top2 = sortedClusters.slice(0,2);
+  const sortedHumanities = Object.entries(scores.humanities).sort((a,b)=>b[1]-a[1]);
+  const topH = sortedHumanities.slice(0,2);
+
+  const clusterNames = { I:'Analytical-Investigative', AV:'Artistic-Verbal', S:'Social-Helping', R:'Practical-Maker', E:'Enterprising-Initiator', C:'Organized-Detail' };
+  const humanitiesNames = { HLIT:'Reading & Literature', HCIV:'History & Civics', HLANG:'Languages', HAM:'Arts & Media' };
+  const themes = pickThemes(top2, topH);
+
+  const briefWindow = window.open('', 'ParentBrief', 'width=800,height=1000');
+  const d = briefWindow.document;
+
+  const scoreItem = (label, val) => `
+    <div class="score-item">
+      <div class="label">${label}</div>
+      <div class="bar"><div class="fill" style="width:${Math.round(val)}%"></div></div>
+      <div class="num">${Math.round(val)}%</div>
+    </div>`;
+
+  d.write(`<!DOCTYPE html>
+  <html><head><meta charset="utf-8"><title>Parent Summary</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:720px;margin:24px auto;line-height:1.5;color:#1f2937}
+    h1{font-size:22px;color:#4f46e5;margin:0 0 10px}
+    h2{font-size:18px;margin:18px 0 8px;color:#374151}
+    p{margin:8px 0}
+    .section{padding:12px 0;border-top:1px solid #e5e7eb}
+    .scores{display:grid;grid-template-columns:1fr;gap:10px}
+    .score-item{display:grid;grid-template-columns:160px 1fr 48px;align-items:center;gap:10px}
+    .bar{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+    .fill{height:100%;background:#6366f1}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;margin-right:6px;margin-bottom:6px}
+    .btn-print{margin-top:18px;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:#fff}
+    ul{margin:8px 0 8px 18px}
+  </style></head>
+  <body>
+    <h1>Parent Summary</h1>
+
+    <div class="section">
+      <h2>Top Interest Patterns</h2>
+      <div class="scores">
+        ${sortedClusters.map(([k,v]) => scoreItem(clusterNames[k], v)).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Humanities Snapshot</h2>
+      <div class="scores">
+        ${sortedHumanities.map(([k,v]) => scoreItem(humanitiesNames[k], v)).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Suggested Exploration Themes</h2>
+      <p>Low-cost, low-stakes directions to try next:</p>
+      <ul>${themes.map(t => `<li>${t}</li>`).join('')}</ul>
+    </div>
+
+    <div class="section">
+      <h2>Quick Snapshot</h2>
+      <p><strong>Study habits:</strong> ${band.label}. Tip: ${band.tip}</p>
+    </div>
+
+    <div class="section">
+      <h2>This Week’s Actions</h2>
+      <ul>
+        <li>Let your child pick one theme above and plan a one-hour “first step”.</li>
+        <li>Encourage a short reflection afterwards: what worked, what to change.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Home Support Tips</h2>
+      <ul>
+        <li>Keep it exploratory; avoid turning interests into “tracks”.</li>
+        <li>Offer small scaffolds (materials, time, a buddy) instead of pressure.</li>
+      </ul>
+    </div>
+
+    <div style="text-align:right">
+      <button class="btn-print" onclick="window.print()">Print This Brief</button>
+    </div>
+  </body></html>`);
+  d.close();
 }
 
 function showResults() {
@@ -957,6 +1073,7 @@ window.saveShortAnswer = saveShortAnswer;
 window.previousSection = previousSection;
 window.nextSection = nextSection;
 window.printResults = printResults;
+window.addMoreModules = addMoreModules;
 window.downloadJSON = downloadJSON;
 window.downloadCSV = downloadCSV;
 window.importJSON = importJSON;
