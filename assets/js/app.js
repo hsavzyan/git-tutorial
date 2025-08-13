@@ -209,54 +209,116 @@ function renderOptionalModule() {
     let html = '';
     if (module.subsections) {
         const subsection = module.subsections[currentSubsectionIndex];
-        html = `\n            <h2 class="section-title">${module.title}</h2>\n            <h3 style="color: #764ba2; margin-bottom: 10px;">${subsection.title}</h3>\n            <p class="section-description">${subsection.description}</p>\n        `;
+        html = `
+            <h2 class="section-title">${module.title}</h2>
+            <h3 style="color: #764ba2; margin-bottom: 10px;">${subsection.title}</h3>
+            <p class="section-description">${subsection.description}</p>
+        `;
         if (subsection.questions) {
             subsection.questions.forEach(q => {
-                html += `\n                    <div class="question-group" data-qid="${q.id}">\n                        <div class="question-id">${q.id}</div>\n                        <div class="question-text">${q.text}</div>\n                        <div class="scale-options">\n                `;
+                html += `
+                    <div class="question-group" data-qid="${q.id}">
+                        <div class="question-id">${q.id}</div>
+                        <div class="question-text">${q.text}</div>
+                        <div class="scale-options">
+                `;
                 subsection.scale.forEach((label, idx) => {
                     const isSelected = responses[q.id] === idx;
-                    html += `\n                            <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>\n                    `;
+                    html += `
+                            <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>
+                    `;
                 });
                 html += `</div></div>`;
             });
         }
         if (subsection.mcq) {
             const q = subsection.mcq;
-            html += `\n                <div class="question-group" data-qid="${q.id}">\n                    <div class="question-id">${q.id}</div>\n                    <div class="question-text">${q.text}</div>\n                    <div class="mcq-options">\n            `;
+            html += `
+                <div class="question-group" data-qid="${q.id}">
+                    <div class="question-id">${q.id}</div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="mcq-options">
+            `;
             q.options.forEach((opt, idx) => {
                 const isSelected = responses[q.id] === idx;
-                html += `\n                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">\n                            <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>\n                            <span>${opt}</span>\n                        </div>\n                `;
+                html += `
+                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">
+                            <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
+                            <span>${opt}</span>
+                        </div>
+                `;
             });
             html += `</div></div>`;
         }
     } else if (module.type === 'mcq') {
-        html = `\n            <h2 class="section-title">${module.title}</h2>\n            <p class="section-description">${module.description}</p>\n        `;
+        html = `
+            <h2 class="section-title">${module.title}</h2>
+            <p class="section-description">${module.description}</p>
+        `;
         module.questions.forEach(q => {
-            html += `\n                <div class="question-group" data-qid="${q.id}">\n                    <div class="question-id">${q.id}</div>\n                    <div class="question-text">${q.text}</div>\n                    <div class="mcq-options">\n            `;
+            html += `
+                <div class="question-group" data-qid="${q.id}">
+                    <div class="question-id">${q.id}</div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="mcq-options">
+            `;
             q.options.forEach((opt, idx) => {
                 const isSelected = responses[q.id] === idx;
-                html += `\n                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">\n                            <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>\n                            <span>${opt}</span>\n                        </div>\n                `;
+                html += `
+                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">
+                            <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
+                            <span>${opt}</span>
+                        </div>
+                `;
             });
             html += `</div></div>`;
         });
     } else if (module.type === 'short') {
-        html = `\n            <h2 class="section-title">${module.title}</h2>\n            <p class="section-description">${module.description}</p>\n        `;
+        html = `
+            <h2 class="section-title">${module.title}</h2>
+            <p class="section-description">${module.description}</p>
+        `;
         module.questions.forEach(q => {
             const value = responses[q.id] || '';
-            html += `\n                <div class="question-group" data-qid="${q.id}">\n                    <div class="question-id">${q.id}</div>\n                    <div class="question-text">${q.text}</div>\n                    <textarea class="short-answer" id="${q.id}" onchange="saveShortAnswer('${q.id}')">${value}</textarea>\n                </div>\n            `;
+            html += `
+                <div class="question-group" data-qid="${q.id}">
+                    <div class="question-id">${q.id}</div>
+                    <div class="question-text">${q.text}</div>
+                    <textarea class="short-answer" id="${q.id}" onchange="saveShortAnswer('${q.id}')">${value}</textarea>
+                </div>
+            `;
         });
     } else {
-        html = `\n            <h2 class="section-title">${module.title}</h2>\n            <p class="section-description">${module.description}</p>\n        `;
+        html = `
+            <h2 class="section-title">${module.title}</h2>
+            <p class="section-description">${module.description}</p>
+        `;
         module.questions.forEach(q => {
-            html += `\n                <div class="question-group" data-qid="${q.id}">\n                    <div class="question-id">${q.id}</div>\n                    <div class="question-text">${q.text}</div>\n                    <div class="scale-options">\n            `;
+            html += `
+                <div class="question-group" data-qid="${q.id}">
+                    <div class="question-id">${q.id}</div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="scale-options">
+            `;
             module.scale.forEach((label, idx) => {
                 const isSelected = responses[q.id] === idx;
-                html += `\n                        <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>\n                `;
+                html += `
+                        <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>
+                `;
             });
             html += `</div></div>`;
         });
     }
-    html += `\n        <div class="navigation">\n            <button class="nav-button secondary" onclick="previousModule()">\n                ← Previous\n            </button>\n            <button class="nav-button" onclick="nextModule()">\n                ${isLastModule() ? 'See Results →' : 'Next →'}\n            </button>\n        </div>\n    `;
+    html += `
+        <div class="navigation">
+            <button class="nav-button secondary" onclick="previousModule()">
+                ← Previous
+            </button>
+            <button class="nav-button" onclick="nextModule()">
+                ${isLastModule() ? 'See Results →' : 'Next →'}
+            </button>
+        </div>
+    `;
     sectionDiv.innerHTML = html;
     container.appendChild(sectionDiv);
     updateModuleProgress();
@@ -348,27 +410,56 @@ function renderSection() {
     const section = testData.sections[currentSection];
     const sectionDiv = document.createElement('div');
     sectionDiv.className = 'section active';
-    let html = `\n        <h2 class="section-title">${section.title}</h2>\n        <p class="section-description">${section.description}</p>\n    `;
+    let html = `
+        <h2 class="section-title">${section.title}</h2>
+        <p class="section-description">${section.description}</p>
+    `;
     if (section.type === 'mcq') {
         section.questions.forEach(q => {
-            html += `\n                <div class="question-group" data-qid="${q.id}">\n                    <div class="question-id">${q.id}</div>\n                    <div class="question-text">${q.text}</div>\n                    <div class="mcq-options">\n            `;
+            html += `
+                <div class="question-group" data-qid="${q.id}">
+                    <div class="question-id">${q.id}</div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="mcq-options">
+            `;
             q.options.forEach((opt, idx) => {
                 const isSelected = responses[q.id] === idx;
-                html += `\n                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">\n                            <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>\n                            <span>${opt}</span>\n                        </div>\n                `;
+                html += `
+                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectMCQ('${q.id}', ${idx})">
+                            <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
+                            <span>${opt}</span>
+                        </div>
+                `;
             });
             html += `</div></div>`;
         });
     } else {
         section.questions.forEach(q => {
-            html += `\n                <div class="question-group" data-qid="${q.id}">\n                    <div class="question-id">${q.id}</div>\n                    <div class="question-text">${q.text}</div>\n                    <div class="scale-options">\n            `;
+            html += `
+                <div class="question-group" data-qid="${q.id}">
+                    <div class="question-id">${q.id}</div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="scale-options">
+            `;
             section.scale.forEach((label, idx) => {
                 const isSelected = responses[q.id] === idx;
-                html += `\n                        <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>\n                `;
+                html += `
+                        <div class="scale-option ${isSelected ? 'selected' : ''}" onclick="selectScale('${q.id}', ${idx})">${label}</div>
+                `;
             });
             html += `</div></div>`;
         });
     }
-    html += `\n        <div class="navigation">\n            <button class="nav-button secondary" onclick="previousSection()" ${currentSection === 0 ? 'disabled' : ''}>\n                ← Previous\n            </button>\n            <button class="nav-button" onclick="nextSection()">\n                ${currentSection === testData.sections.length - 1 ? 'Continue →' : 'Next →'}\n            </button>\n        </div>\n    `;
+    html += `
+        <div class="navigation">
+            <button class="nav-button secondary" onclick="previousSection()" ${currentSection === 0 ? 'disabled' : ''}>
+                ← Previous
+            </button>
+            <button class="nav-button" onclick="nextSection()">
+                ${currentSection === testData.sections.length - 1 ? 'Continue →' : 'Next →'}
+            </button>
+        </div>
+    `;
     sectionDiv.innerHTML = html;
     container.appendChild(sectionDiv);
     updateProgress();
@@ -743,7 +834,11 @@ function showResults() {
     const clusterBarsHTML = () => {
         let h = '<div class="cluster-chart">';
         Object.entries(scores.clusters).sort((a,b)=>b[1]-a[1]).forEach(([k,pct]) => {
-            h += `\n                <div class="cluster-item">\n                    <div class="cluster-label"><span>${clusterNames[k]}</span><span class="cluster-score">${Math.round(pct)}%</span></div>\n                    <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>\n                </div>`;
+            h += `
+                <div class="cluster-item">
+                    <div class="cluster-label"><span>${clusterNames[k]}</span><span class="cluster-score">${Math.round(pct)}%</span></div>
+                    <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
+                </div>`;
         });
         h += '</div>';
         return h;
@@ -751,17 +846,16 @@ function showResults() {
     const humanitiesBarsHTML = () => {
         let h = '<div class="cluster-chart">';
         Object.entries(scores.humanities).sort((a,b)=>b[1]-a[1]).forEach(([k,pct]) => {
-            h += `\n                <div class="cluster-item">\n                    <div class="cluster-label"><span>${humanitiesNames[k]}</span><span class="cluster-score">${Math.round(pct)}%</span></div>\n                    <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>\n                </div>`;
+            h += `
+                <div class="cluster-item">
+                    <div class="cluster-label"><span>${humanitiesNames[k]}</span><span class="cluster-score">${Math.round(pct)}%</span></div>
+                    <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
+                </div>`;
         });
         h += '</div>';
         return h;
     };
     let html = `
-        <div class="result-card" style="display:flex;gap:8px;align-items:center;justify-content:flex-end;">
-            <span>Teen tone:</span>
-            <button class="print-button" id="teenClassic" style="margin:0;">Classic</button>
-            <button class="print-button" id="teenChill" style="margin:0;">Chill mode 😎</button>
-        </div>
         <div class="result-card" style="border-left-color:${quality.attnOK && !quality.straightFlag ? '#4caf50' : '#ff9800'}">
             <h3>✅ ${slang('Quality check (no penalty)')}</h3>
             <p>${quality.attnOK ? slang('Attention check looks good.') : slang('If you were moving quickly, you can switch the attention item to "Sometimes."')}</p>
