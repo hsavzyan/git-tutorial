@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Interest & Aptitude Explorer</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#f0f3ff;margin:0;padding:0;}
+.container{max-width:900px;margin:0 auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+.hidden{display:none;}
+.progress{height:8px;background:#ddd;margin:20px 0;border-radius:4px;overflow:hidden;}
+.progress div{height:100%;width:0;background:#667eea;}
+.question{margin:20px 0;}
+.options{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;}
+.options button{margin:2px;padding:6px 10px;border:1px solid #667eea;background:#fff;border-radius:4px;cursor:pointer;}
+.options button.selected{background:#667eea;color:#fff;}
+.nav{display:flex;justify-content:space-between;margin-top:20px;}
+.nav button{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;background:#667eea;color:#fff;}
+.nav button:disabled{background:#ccc;}
+#resetBtn{background:#e53e3e;margin-right:10px;}
+#results{background:#eef;border-left:4px solid #667eea;margin:20px 0;padding:10px;border-radius:4px;}
+.module-list{display:flex;flex-direction:column;gap:10px;}
+.module-item{border:1px solid #667eea;padding:10px;border-radius:4px;cursor:pointer;}
+.module-item.selected{background:#667eea;color:#fff;}
+.printBtn{background:#fff;color:#667eea;border:1px solid #667eea;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Interest & Aptitude Explorer</h1>
+<p>Discover what you enjoy – no right or wrong answers.</p>
+<div id="welcome">
+<p>Ready to explore?</p>
+<button id="startBtn">Let's Begin!</button>
+</div>
+<div class="progress"><div id="prog"></div></div>
+<div id="section-container" class="hidden"></div>
+<div class="nav hidden" id="navControls">
+<button id="resetBtn" onclick="resetTest()">Reset</button>
+<button id="prev" disabled>Previous</button>
+<button id="next">Next</button>
+</div>
+<div id="module-select" class="hidden">
+<h2>Optional Modules</h2>
+<p>Select modules to explore or skip to results.</p>
+<div class="module-list">
+<div class="module-item" data-module="humanities">Humanities Deep-Dive</div>
+<div class="module-item" data-module="visual">Visual-Spatial</div>
+</div>
+<div class="nav">
+<button onclick="skipModules()">Skip to Results</button>
+<button onclick="startModules()">Start Modules</button>
+</div>
+</div>
+<div id="results" class="hidden">
+<h2>Your Interest Patterns</h2>
+<div id="results-content"></div>
+<button class="printBtn" onclick="printResults()">Print Results</button>
+</div>
+</div>
+<script>
+// core test data
+const testData={sections:[
+ {id:"interests",title:"A) Interests",scale:["Not at all","A little","Somewhat","Very","Super interested"],questions:[
+  {id:"C-INT-01",text:"Reading a story or novel and talking about the characters or themes",clusters:{AV:1,HLIT:1}},
+  {id:"C-INT-02",text:"Comparing different news articles about the same event",clusters:{I:0.5,HAM:1,AV:0.5}},
+  {id:"C-INT-03",text:"Visiting a museum or historical site and noticing what changed over time",clusters:{AV:0.5,HCIV:1,I:0.5}},
+  {id:"C-INT-04",text:"Learning a new language or writing in a different alphabet",clusters:{AV:0.5,HLANG:1,I:0.5}}
+ ]},
+ {id:"aptitude",title:"B) Mini Aptitude",type:"mcq",questions:[
+  {id:"C-APT-01",text:"Main idea: Mia read three articles about bicycles... What was her main goal?",options:["Write a history report","Choose a safe, affordable bike","Compare city laws","Learn racing techniques"],correct:1,domain:"Verbal"},
+  {id:"C-APT-04",text:"Number pattern: 2,4,7,11,?",options:["13","15","16","18"],correct:2,domain:"Logic"}
+ ]},
+ {id:"habits",title:"C) Study Habits",scale:["Never","Rarely","Sometimes","Often","Always"],questions:[
+  {id:"C-HAB-01",text:"Plan your week and set small goals for schoolwork"},
+  {id:"C-HAB-02",text:"Start tasks early instead of the last minute"}
+ ]},
+ {id:"curiosity",title:"D) Curiosity",scale:["No","Maybe","Yes (soon)"],questions:[
+  {id:"C-CUR-01",text:"Debate or speech club"},
+  {id:"C-CUR-02",text:"Start a small zine/blog/podcast"}
+ ]},
+ {id:"quality",title:"E) Quality Check",scale:["Never","Rarely","Sometimes","Often","Always"],questions:[{id:"C-QUAL-01",text:"To help keep results accurate, please select 'Sometimes'",expected:2}]}
+],
+modules:{
+ humanities:{title:"Humanities Deep-Dive",scale:["Not at all","A little","Somewhat","Very","Super interested"],questions:[
+  {id:"O-HUM-01",text:"Reading short stories and choosing a theme"},
+  {id:"O-HUM-02",text:"Making a simple timeline for an event"}
+ ],mcq:{id:"O-HUM-03",text:"'telefon/telefono/телефон/տելեֆոն' helps you guess meaning using:",options:["Random guessing","Cognates","Only emojis","Changing alphabet"],correct:1}},
+ visual:{title:"Visual-Spatial",type:"mcq",questions:[
+  {id:"O-VIS-01",text:"You face north. Turn right. Which way now?",options:["East","West","North","South"],correct:0},
+  {id:"O-VIS-02",text:"Map shows library north and park east of it. Park is ____ of home?",options:["north","west","northeast","south"],correct:2}
+ ]}
+ }
+};
+// state
+let sectionIndex=0;let responses={};let activeModules=[];let moduleIndex=0;let inModules=false;
+const container=document.getElementById('section-container');
+const prevBtn=document.getElementById('prev');
+const nextBtn=document.getElementById('next');
+const prog=document.getElementById('prog');
+const resultsDiv=document.getElementById('results-content');
+const moduleSelect=document.getElementById('module-select');
+const navControls=document.getElementById('navControls');
+const startBtn=document.getElementById('startBtn');
+
+function renderSection(){
+ const sec=testData.sections[sectionIndex];
+ container.innerHTML=`<h2>${sec.title}</h2>`;
+ sec.questions.forEach(q=>{
+  const div=document.createElement('div');div.className='question';
+  div.innerHTML=`<p>${q.text}</p>`;
+  const optDiv=document.createElement('div');optDiv.className='options';
+  const scale=sec.type==='mcq'?q.options:sec.scale;
+  scale.forEach((label,idx)=>{
+   const btn=document.createElement('button');btn.textContent=label;
+   if(responses[q.id]===idx)btn.classList.add('selected');
+   btn.onclick=()=>{responses[q.id]=idx;renderSection();};
+   optDiv.appendChild(btn);
+  });
+  div.appendChild(optDiv);container.appendChild(div);
+ });
+ prevBtn.disabled=sectionIndex===0;
+ nextBtn.textContent=sectionIndex===testData.sections.length-1?'Finish':'Next';
+ prog.style.width=((sectionIndex)/testData.sections.length*100)+'%';
+}
+
+function nextSection(){
+ if(sectionIndex<testData.sections.length-1){sectionIndex++;renderSection();}
+ else{navControls.classList.add('hidden');moduleSelect.classList.remove('hidden');}
+}
+function prevSection(){if(sectionIndex>0){sectionIndex--;renderSection();}}
+prevBtn.onclick=prevSection;nextBtn.onclick=nextSection;
+
+function startTest(){
+ document.getElementById('welcome').classList.add('hidden');
+ container.classList.remove('hidden');
+ navControls.classList.remove('hidden');
+ renderSection();
+}
+
+// modules
+const moduleItems=document.querySelectorAll('.module-item');
+startBtn.onclick=startTest;
+moduleItems.forEach(item=>item.onclick=()=>{
+ const id=item.getAttribute('data-module');
+ if(activeModules.includes(id)){activeModules=activeModules.filter(m=>m!==id);item.classList.remove('selected');}
+ else{activeModules.push(id);item.classList.add('selected');}
+});
+function skipModules(){moduleSelect.classList.add('hidden');showResults();}
+function startModules(){if(activeModules.length===0){alert('Select at least one module or skip.');return;}inModules=true;moduleSelect.classList.add('hidden');moduleIndex=0;renderModule();}
+
+function renderModule(){
+ const id=activeModules[moduleIndex];
+ const mod=testData.modules[id];
+ container.innerHTML=`<h2>${mod.title}</h2>`;
+ if(mod.type==='mcq'){
+  mod.questions.forEach(q=>{
+   const div=document.createElement('div');div.className='question';div.innerHTML=`<p>${q.text}</p>`;
+   const optDiv=document.createElement('div');optDiv.className='options';
+   q.options.forEach((opt,idx)=>{
+    const btn=document.createElement('button');btn.textContent=opt;if(responses[q.id]===idx)btn.classList.add('selected');
+    btn.onclick=()=>{responses[q.id]=idx;renderModule();};optDiv.appendChild(btn);});
+   div.appendChild(optDiv);container.appendChild(div);
+  });
+ }else{
+  mod.questions.forEach(q=>{
+   const div=document.createElement('div');div.className='question';div.innerHTML=`<p>${q.text}</p>`;
+   const optDiv=document.createElement('div');optDiv.className='options';
+   mod.scale.forEach((label,idx)=>{
+    const btn=document.createElement('button');btn.textContent=label;if(responses[q.id]===idx)btn.classList.add('selected');
+    btn.onclick=()=>{responses[q.id]=idx;renderModule();};optDiv.appendChild(btn);});
+   div.appendChild(optDiv);container.appendChild(div);
+  });
+  if(mod.mcq){
+   const q=mod.mcq;const div=document.createElement('div');div.className='question';div.innerHTML=`<p>${q.text}</p>`;
+   const optDiv=document.createElement('div');optDiv.className='options';q.options.forEach((opt,idx)=>{const btn=document.createElement('button');btn.textContent=opt;if(responses[q.id]===idx)btn.classList.add('selected');btn.onclick=()=>{responses[q.id]=idx;renderModule();};optDiv.appendChild(btn);});
+   div.appendChild(optDiv);container.appendChild(div);
+  }
+ }
+ const nav=document.createElement('div');nav.className='nav';
+ nav.innerHTML=`<button onclick="prevModule()" ${moduleIndex===0?'disabled':''}>Previous</button><button onclick="nextModule()">${moduleIndex===activeModules.length-1?'Finish':'Next'}</button>`;
+ container.appendChild(nav);
+}
+function nextModule(){if(moduleIndex<activeModules.length-1){moduleIndex++;renderModule();}else{showResults();}}
+function prevModule(){if(moduleIndex>0){moduleIndex--;renderModule();}}
+
+// results & utilities
+function calculate(){
+ const clusterScores={I:0,AV:0,S:0,R:0,E:0,C:0};
+ const clusterMax={I:0,AV:0,S:0,R:0,E:0,C:0};
+ testData.sections.forEach(sec=>sec.questions.forEach(q=>{const v=responses[q.id];if(q.clusters&&v!==undefined){for(const [k,w] of Object.entries(q.clusters)){clusterScores[k]+=v*w;clusterMax[k]+=4*w;}}}));
+ Object.keys(clusterScores).forEach(k=>{if(clusterMax[k]>0)clusterScores[k]=Math.round(clusterScores[k]/clusterMax[k]*100);else delete clusterScores[k];});
+ return clusterScores;
+}
+function showResults(){
+ const scores=calculate();
+ resultsDiv.innerHTML='';
+ Object.entries(scores).forEach(([k,v])=>{const div=document.createElement('div');div.textContent=`${k}: ${v}%`;resultsDiv.appendChild(div);});
+ document.getElementById('results').classList.remove('hidden');
+ container.innerHTML='';
+ navControls.classList.add('hidden');
+}
+function resetTest(){
+ if(confirm('Clear all answers?')){
+  responses={};sectionIndex=0;activeModules=[];moduleIndex=0;inModules=false;
+  container.innerHTML='';
+  container.classList.add('hidden');
+  document.getElementById('results').classList.add('hidden');
+  moduleSelect.classList.add('hidden');
+  navControls.classList.add('hidden');
+  document.getElementById('welcome').classList.remove('hidden');
+  prog.style.width='0%';
+ }
+}
+function printResults(){window.print();}
+</script>
+</body>
+</html>
