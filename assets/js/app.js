@@ -25,6 +25,25 @@ if (localStorage.getItem('levonSubsectionIndex')) {
     currentSubsectionIndex = parseInt(localStorage.getItem('levonSubsectionIndex'));
 }
 
+const THEMES = {
+  indigo:{accent:'#6366f1',accent600:'#4f46e5',accent100:'#eef2ff'},
+  teal:{accent:'#14b8a6',accent600:'#0d9488',accent100:'#ccfbf1'},
+  amber:{accent:'#f59e0b',accent600:'#d97706',accent100:'#fef3c7'}
+};
+
+function setTheme(name){
+  const t = THEMES[name] || THEMES.indigo;
+  Object.entries(t).forEach(([k,v])=>document.documentElement.style.setProperty(`--${k}`, v));
+  localStorage.setItem('levonTheme', name);
+  document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active', b.dataset.theme===name));
+}
+
+(function initTheme(){
+  const saved = localStorage.getItem('levonTheme') || 'indigo';
+  setTheme(saved);
+  document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click', ()=>setTheme(b.dataset.theme)));
+})();
+
 // Show resume button if there's saved progress
 document.addEventListener('DOMContentLoaded', () => {
     const hasProgress = Object.keys(responses).length > 0 || currentSection > 0 || selectedModules.length > 0;
@@ -211,7 +230,7 @@ function renderOptionalModule() {
         const subsection = module.subsections[currentSubsectionIndex];
         html = `
             <h2 class="section-title">${module.title}</h2>
-            <h3 style="color: #764ba2; margin-bottom: 10px;">${subsection.title}</h3>
+            <h3 style="color: var(--accent-600); margin-bottom: 10px;">${subsection.title}</h3>
             <p class="section-description">${subsection.description}</p>
         `;
         if (subsection.questions) {
@@ -521,16 +540,14 @@ function saveProgress() {
 }
 
 function updateProgress() {
-    let total = 0, answered = 0;
-    testData.sections.forEach(sec => {
-        if (!sec.questions) return;
-        sec.questions.forEach(q => {
-            total++;
-            if (responses[q.id] !== undefined && responses[q.id] !== '') answered++;
-        });
-    });
-    const pct = total ? (answered / total) * 100 : ((currentSection + 1) / testData.sections.length) * 100;
-    document.getElementById('progressBar').style.width = pct + '%';
+  let total = 0, answered = 0;
+  testData.sections.forEach(sec => {
+    if (!sec.questions) return;
+    sec.questions.forEach(q => { total++; if (responses[q.id] !== undefined && responses[q.id] !== '') answered++; });
+  });
+  const pct = total ? Math.round((answered / total) * 100) : Math.round(((currentSection + 1) / testData.sections.length) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  const pctEl = document.getElementById('progressPct'); if (pctEl) pctEl.textContent = pct + '%';
 }
 
 function nextSection() {
@@ -939,6 +956,8 @@ function showResults() {
     const resultsContent = document.getElementById('resultsContent');
     const sortedClusters = Object.entries(scores.clusters).sort((a,b)=>b[1]-a[1]);
     const sortedHumanities = Object.entries(scores.humanities).sort((a,b)=>b[1]-a[1]);
+    const topClusters = sortedClusters.slice(0,3);
+    const topHumanities = sortedHumanities.slice(0,3);
     const clusterNames = { I:'Analytical-Investigative', AV:'Artistic-Verbal', S:'Social-Helping', R:'Practical-Maker', E:'Enterprising-Initiator', C:'Organized-Detail' };
     const humanitiesNames = { HLIT:'Reading & Literature', HCIV:'History & Civics', HLANG:'Languages', HAM:'Arts & Media' };
     const clusterDescriptions = {
@@ -1002,7 +1021,15 @@ function showResults() {
         </div>
         `;
     }
+    const clusterPills = topClusters.map(([k])=>`<span class="pill">${k}</span>`).join('');
+    const humanPills = topHumanities.map(([k])=>`<span class="pill">${k}</span>`).join('');
     html += `
+        <div class="result-card">
+          <h3>Top clusters</h3>
+          <div class="pills">${clusterPills}</div>
+          <h3 style="margin-top:12px">Top humanities</h3>
+          <div class="pills">${humanPills}</div>
+        </div>
         <div class="result-card"><h3>🎯 Your Interest Patterns</h3>${clusterBarsHTML()}<p style="margin-top:12px">Think of these as the kinds of activities you naturally lean toward—not boxes, just clues for what could be fun or meaningful right now.</p></div>
         <div class="result-card"><h3>💡 What This Means</h3>
     `;
@@ -1019,13 +1046,13 @@ function showResults() {
     if (habitsScore <= 10) {
         habitsMessage = 'You\'re still forming study routines. Try picking one small habit this week, like setting a timer for 15-minute study sessions.';
     } else if (habitsScore <= 21) {
-        habitsMessage = 'You\'re building consistency! Keep strengthening these habits. Maybe try a study buddy or a new note-taking method.';
+        habitsMessage = 'You\'re building consistency. Keep strengthening these habits. Maybe try a study buddy or a new note-taking method.';
     } else {
-        habitsMessage = 'You have strong, reliable study habits! Keep up the great work and maybe share your tips with friends.';
+        habitsMessage = 'You have strong, reliable study habits. Keep up the great work and maybe share your tips with friends.';
     }
     html += `<div class="result-card"><h3>📖 Study Habits</h3><p>${habitsMessage}</p></div>`;
     if (tryNext.length) {
-        html += `<div class="result-card"><h3>🚀 Ready to Try</h3><p>You said you're interested in trying:</p><ul>${tryNext.map(x=>`<li>${x}</li>`).join('')}</ul>${recommended ? `<p style="margin-top:10px;color:#667eea;"><strong>Quick win:</strong> ${recommended} — pick a date, a buddy, and what "done" looks like.</p>` : ''}</div>`;
+        html += `<div class="result-card"><h3>🚀 Ready to Try</h3><p>You said you're interested in trying:</p><ul>${tryNext.map(x=>`<li>${x}</li>`).join('')}</ul>${recommended ? `<p style="margin-top:10px;color:var(--accent);"><strong>Quick win:</strong> ${recommended} — pick a date, a buddy, and what "done" looks like.</p>` : ''}</div>`;
     }
     if (responses['O-REF-01'] || responses['O-REF-02'] || responses['O-REF-03']) {
         html += '<div class="result-card"><h3>💭 Your Reflections</h3>';

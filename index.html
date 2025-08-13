@@ -10,35 +10,43 @@
     <div class="container">
         <div class="header">
             <button class="reset-button" onclick="resetTest()">Reset Test</button>
+            <div class="accent-swatches" aria-label="Theme">
+              <button class="swatch" data-theme="indigo" title="Indigo"></button>
+              <button class="swatch" data-theme="teal" title="Teal"></button>
+              <button class="swatch" data-theme="amber" title="Amber"></button>
+            </div>
             <h1>Interest & Aptitude Explorer</h1>
-            <p>Discover what you enjoy • No right or wrong answers</p>
-            <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+            <p>Explore what you enjoy. There aren't right answers.</p>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressBar"></div>
+              <span class="progress-pct" id="progressPct">0%</span>
+            </div>
         </div>
         <div class="content">
             <div class="section active" id="welcome">
                 <div class="welcome-section">
-                    <h2>Hey Levon! 👋</h2>
+                    <h2>Hey Levon 👋</h2>
                     <p>This is your personal exploration tool—a friendly way to discover what interests you and what you might enjoy trying next.</p>
                     <p><strong>How it works:</strong></p>
                     <p>📝 Answer questions about what interests you<br>⏰ Takes about 20-25 minutes for the core (you can pause anytime)<br>🎯 Get personalized suggestions for activities to explore<br>🔒 Everything saves automatically as you go</p>
-                    <p style="color:#999;font-size:0.95em;margin-top:30px;">Remember: This is just for exploration—nothing here labels or tracks you. It's all about finding cool stuff you might want to try!</p>
+                    <p style="color:#999;font-size:0.95em;margin-top:30px;">Remember: This is just for exploration—nothing here labels or tracks you. It's all about finding cool stuff you might want to try.</p>
                     <p id="privacyNote" style="color:#999;font-size:0.95em;margin-top:10px;"><strong>Privacy:</strong> Your answers stay on this device (saved in your browser). You can reset, download, or import them anytime.</p>
-                    <button class="start-button" onclick="startTest()">Let's Begin!</button>
+                    <button class="start-button" onclick="startTest()">Start</button>
                     <button class="start-button" id="resumeBtn" style="display:none;margin-left:10px;" onclick="resumeTest()">Resume where I left off</button>
                 </div>
             </div>
             <div id="testSections"></div>
             <div class="section" id="moduleSelection">
                 <div class="module-selector">
-                    <h2>Optional Deep-Dive Modules 🔍</h2>
-                    <p>Great job completing the core! Want to explore specific areas in more detail?<br>Select any modules you'd like to try (or skip to see your results):</p>
+                    <h2>Optional Modules</h2>
+                    <p>Pick any modules you want, or skip straight to your results.</p>
                     <div class="module-options">
-                        <div class="module-card" onclick="toggleModule('humanities')" id="module-humanities"><h4>📚 Humanities Deep-Dive</h4><p>Literature, History, Languages, Arts & Media</p><div class="module-time">~10-15 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('visual')" id="module-visual"><h4>🗺️ Visual-Spatial & Mapping</h4><p>Spatial reasoning and navigation puzzles</p><div class="module-time">~8 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('maker')" id="module-maker"><h4>🔧 Maker & Tech Sampler</h4><p>Hands-on building and technology</p><div class="module-time">~6 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('creative')" id="module-creative"><h4>✨ Creative Sparks</h4><p>Quick creative writing exercises</p><div class="module-time">~4 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('community')" id="module-community"><h4>🤝 Community & Leadership</h4><p>Working with others and leading projects</p><div class="module-time">~5 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('reflection')" id="module-reflection"><h4>💭 Reflection</h4><p>Think about what you want to try next</p><div class="module-time">~3 minutes</div></div>
+                        <div class="module-card" onclick="toggleModule('humanities')" id="module-humanities"><h4>Humanities</h4><p>Literature, History, Languages, Arts & Media</p><div class="module-time">~10-15 minutes</div></div>
+                        <div class="module-card" onclick="toggleModule('visual')" id="module-visual"><h4>Visual-Spatial & Mapping</h4><p>Spatial reasoning and navigation puzzles</p><div class="module-time">~8 minutes</div></div>
+                        <div class="module-card" onclick="toggleModule('maker')" id="module-maker"><h4>Maker & Tech</h4><p>Hands-on building and technology</p><div class="module-time">~6 minutes</div></div>
+                        <div class="module-card" onclick="toggleModule('creative')" id="module-creative"><h4>Creative</h4><p>Quick creative writing exercises</p><div class="module-time">~4 minutes</div></div>
+                        <div class="module-card" onclick="toggleModule('community')" id="module-community"><h4>Community & Leadership</h4><p>Working with others and leading projects</p><div class="module-time">~5 minutes</div></div>
+                        <div class="module-card" onclick="toggleModule('reflection')" id="module-reflection"><h4>Reflection</h4><p>Think about what you want to try next</p><div class="module-time">~3 minutes</div></div>
                     </div>
                     <div class="module-nav">
                         <button class="nav-button secondary" onclick="skipModules()">Skip to Results</button>
@@ -48,10 +56,10 @@
             </div>
             <div class="section" id="results">
                 <div class="results-section">
-                    <h2>Your Results 🎉</h2>
+                    <h2>Your Results</h2>
                     <div id="resultsContent"></div>
                     <div class="result-tools">
-                      <button class="tool-button" onclick="generateParentBrief()">Parent summary</button>
+                      <button class="tool-button" onclick="generateParentBrief()">Parent brief</button>
                       <button class="tool-button" onclick="downloadJSON()">Export JSON</button>
                       <button class="tool-button" onclick="downloadCSV()">Export CSV</button>
                       <button class="tool-button" onclick="downloadItemBank()">Download item bank</button>
@@ -62,7 +70,7 @@
                       </label>
                     </div>
                     <button class="print-button" onclick="printResults()">Print/Save Results</button>
-                    <button class="print-button" onclick="addMoreModules()">Add more modules</button>
+                    <button class="print-button" onclick="addMoreModules()">Add optional modules</button>
                 </div>
             </div>
         </div>
