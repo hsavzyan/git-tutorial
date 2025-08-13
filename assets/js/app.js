@@ -754,13 +754,47 @@ function importJSON(evt) {
 }
 
 function downloadItemBank() {
-    const bank = { title: 'Levon Interest & Aptitude Orientation', version: '1.0', sections: testData.sections, optionalModules: testData.optionalModules };
-    const blob = new Blob([JSON.stringify(bank, null, 2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'levon_item_bank.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
+  const bank = {
+    title: "Levon Interest & Aptitude Orientation",
+    version: "1.0",
+    scales: {
+      interest5: ["Not at all","A little","Somewhat","Very","Super interested"],
+      freq5: ["Never","Rarely","Sometimes","Often","Always"],
+      curiosity3: ["No","Maybe","Yes (soon)"]
+    },
+    score_map: {
+      // index = score; keep indexes aligned with labels
+      interest5: [0,1,2,3,4],
+      freq5: [0,1,2,3,4],
+      curiosity3: [0,1,2]
+    },
+    scoring_rules: {
+      clusters: "Sum mapped item values; for multi-mapped items split points by weights; rescale to 0–100 via (score / max_possible) * 100.",
+      humanities: "Sum items tagged HLIT/HCIV/HLANG/HAM; rescale to 0–100.",
+      aptitude: {
+        Verbal: ["C-APT-01","C-APT-02","C-APT-03","C-APT-10"],
+        Logic:  ["C-APT-04","C-APT-05","C-APT-06","C-APT-09"],
+        Data:   ["C-APT-07","C-APT-08"],
+        Spatial:["O-VIS-01","O-VIS-02","O-VIS-03","O-VIS-04"]
+      },
+      habits_band: { forming:[0,10], growing:[11,21], strong:[22,32] },
+      quality: {
+        attention: "C-QUAL-01 should equal index 2 (label: 'Sometimes')",
+        straight_line: "Soft-flag if ≥80% identical choices across first 20 interest items"
+      }
+    },
+    clusters: { I:"Analytical-Investigative", AV:"Artistic-Verbal", S:"Social-Helping", R:"Practical-Maker", E:"Enterprising-Initiator", C:"Organized-Detail" },
+    humanities: ["HLIT","HCIV","HLANG","HAM"],
+    sections: testData.sections,
+    optionalModules: testData.optionalModules
+  };
+
+  const blob = new Blob([JSON.stringify(bank, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "levon_item_bank.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function generateParentBrief() {
@@ -813,24 +847,6 @@ function showResults() {
         const prefs = map[topKey] || tryNext;
         recommended = prefs.find(x => tryNext.includes(x)) || tryNext[0];
     }
-    let teenChill = false;
-    const slang = plain => {
-        if (!teenChill) return plain;
-        return plain
-            .replaceAll('Enjoys','Low-key loves')
-            .replaceAll('You might like','You might vibe with')
-            .replaceAll('Small next step','Tiny next move')
-            .replaceAll('Recommended next step','Quick win')
-            .replaceAll('Great job','Nice work')
-            .replaceAll('exploring ideas','nerding out on ideas')
-            .replaceAll('creative expression','creative flow')
-            .replaceAll('presenting/pitching ideas','sharing your pitch')
-            .replaceAll('structure, planning','planning and staying on top of stuff')
-            .replaceAll('Keep practicing','Keep at it')
-            .replaceAll('Excellent','Elite')
-            .replaceAll('Great','Solid')
-            .replaceAll('Good','Pretty good');
-    };
     const clusterBarsHTML = () => {
         let h = '<div class="cluster-chart">';
         Object.entries(scores.clusters).sort((a,b)=>b[1]-a[1]).forEach(([k,pct]) => {
@@ -857,21 +873,31 @@ function showResults() {
     };
     let html = `
         <div class="result-card" style="border-left-color:${quality.attnOK && !quality.straightFlag ? '#4caf50' : '#ff9800'}">
-            <h3>✅ ${slang('Quality check (no penalty)')}</h3>
-            <p>${quality.attnOK ? slang('Attention check looks good.') : slang('If you were moving quickly, you can switch the attention item to "Sometimes."')}</p>
-            <p>${quality.straightFlag ? slang('Many answers in a row were the same. If that was accidental, feel free to skim the interests page again.') : slang('Answer patterns look varied.')}</p>
+          <h3>✅ Quality check (no penalty)</h3>
+          <p>${quality.attnOK ? 'Attention check looks good.' : 'If you were moving quickly, you can switch the attention item to "Sometimes."'}</p>
+          <p>${quality.straightFlag ? 'Many answers in a row were the same. If that was accidental, feel free to skim the interests page again.' : 'Answer patterns look varied.'}</p>
         </div>
-        <div class="result-card"><h3>🎯 ${slang('Your Interest Patterns')}</h3>${clusterBarsHTML()}<p style="margin-top:12px">${slang('Think of these as the kinds of activities you naturally lean toward—not boxes, just clues for what could be fun or meaningful right now.')}</p></div>
-        <div class="result-card"><h3>💡 ${slang('What This Means')}</h3>
+    `;
+    if (selectedModules.length === 0) {
+        html += `
+        <div class="result-card" style="border-left-color:#3b82f6">
+          <h3>🧭 CORE session</h3>
+          <p>You ran the CORE today. Optional modules can be added anytime—your results will update when you take them.</p>
+        </div>
+        `;
+    }
+    html += `
+        <div class="result-card"><h3>🎯 Your Interest Patterns</h3>${clusterBarsHTML()}<p style="margin-top:12px">Think of these as the kinds of activities you naturally lean toward—not boxes, just clues for what could be fun or meaningful right now.</p></div>
+        <div class="result-card"><h3>💡 What This Means</h3>
     `;
     top2.forEach(([k,pct]) => {
         if (pct > 20) {
-            const ideas = (clusterSuggestions[k] || []).slice(0,3).map(s => `• ${slang(s)}`).join('<br>');
-            html += `<p><strong>${clusterNames[k]}:</strong> ${slang(clusterDescriptions[k])}<br>${ideas}</p>`;
+            const ideas = (clusterSuggestions[k] || []).slice(0,3).map(s => `• ${s}`).join('<br>');
+            html += `<p><strong>${clusterNames[k]}:</strong> ${clusterDescriptions[k]}<br>${ideas}</p>`;
         }
     });
-    html += `</div><div class="result-card"><h3>📚 ${slang('Humanities Deep Notes')}</h3>${humanitiesBarsHTML()}<p style="margin-top:10px">${slang('High scores here mean these areas might feel energizing. Mid scores = decent interest; try small experiments. Lower scores aren\'t "bad"—they just might need a cooler entry point.')}</p><ul style="margin-top:8px"><li><strong>${humanitiesNames.HLIT}:</strong> ${slang('Try a short story + 1-paragraph review or annotate a favorite scene.')}</li><li><strong>${humanitiesNames.HCIV}:</strong> ${slang('Pick a local issue, map who\'s affected, and share a one-page explainer.')}</li><li><strong>${humanitiesNames.HLANG}:</strong> ${slang('10-minute daily streak with cognates; track phrases you can actually use.')}</li><li><strong>${humanitiesNames.HAM}:</strong> ${slang('Make a 60-sec video with a clear message; list sources in the caption.')}</li></ul></div>`;
-    html += `<div class="result-card"><h3>🧠 ${slang('Quick Skills Check')}</h3><p><strong>${slang('Verbal/Reading')}:</strong> ${scores.aptitude.verbal}/4 — ${slang(scores.aptitude.verbal >= 3 ? 'Strong comprehension and wording.' : scores.aptitude.verbal >= 2 ? 'Solid base—keep reading and summarizing.' : 'Keep at it—short, daily reading helps a ton.')}</p><p><strong>${slang('Pattern/Logic')}:</strong> ${scores.aptitude.logic}/4 — ${slang(scores.aptitude.logic >= 3 ? 'Elite pattern spotting.' : scores.aptitude.logic >= 2 ? 'Pretty good on puzzle flow.' : 'Practice makes smooth—try daily puzzles.')}</p><p><strong>${slang('Data/Media Sense')}:</strong> ${scores.aptitude.data}/2 — ${slang(scores.aptitude.data === 2 ? 'Solid fact-checking energy.' : scores.aptitude.data === 1 ? 'On the right track—look for sources.' : 'Start with quick source checks before sharing.')}</p>${selectedModules.includes('visual') ? `<p><strong>${slang('Visual-Spatial')}:</strong> ${scores.aptitude.spatial}/4 — ${slang(scores.aptitude.spatial >= 3 ? 'Great spatial awareness.' : scores.aptitude.spatial >= 2 ? 'Good sense of direction.' : 'Try small map/rotation puzzles.')}</p>` : ''}<p style="margin-top:8px">${slang('These are light snapshots—not grades. They show what clicked today, not limits.')}</p></div>`;
+    html += `</div><div class="result-card"><h3>📚 Humanities Deep Notes</h3>${humanitiesBarsHTML()}<p style="margin-top:10px">High scores here mean these areas might feel energizing. Mid scores = decent interest; try small experiments. Lower scores aren't "bad"—they just might need a cooler entry point.</p><ul style="margin-top:8px"><li><strong>${humanitiesNames.HLIT}:</strong> Try a short story + 1-paragraph review or annotate a favorite scene.</li><li><strong>${humanitiesNames.HCIV}:</strong> Pick a local issue, map who's affected, and share a one-page explainer.</li><li><strong>${humanitiesNames.HLANG}:</strong> 10-minute daily streak with cognates; track phrases you can actually use.</li><li><strong>${humanitiesNames.HAM}:</strong> Make a 60-sec video with a clear message; list sources in the caption.</li></ul></div>`;
+    html += `<div class="result-card"><h3>🧠 Quick Skills Check</h3><p><strong>Verbal/Reading:</strong> ${scores.aptitude.verbal}/4 — ${scores.aptitude.verbal >= 3 ? 'Strong comprehension and wording.' : scores.aptitude.verbal >= 2 ? 'Solid base—keep reading and summarizing.' : 'Keep at it—short, daily reading helps a ton.'}</p><p><strong>Pattern/Logic:</strong> ${scores.aptitude.logic}/4 — ${scores.aptitude.logic >= 3 ? 'Elite pattern spotting.' : scores.aptitude.logic >= 2 ? 'Pretty good on puzzle flow.' : 'Practice makes smooth—try daily puzzles.'}</p><p><strong>Data/Media Sense:</strong> ${scores.aptitude.data}/2 — ${scores.aptitude.data === 2 ? 'Solid fact-checking energy.' : scores.aptitude.data === 1 ? 'On the right track—look for sources.' : 'Start with quick source checks before sharing.'}</p>${selectedModules.includes('visual') ? `<p><strong>Visual-Spatial:</strong> ${scores.aptitude.spatial}/4 — ${scores.aptitude.spatial >= 3 ? 'Great spatial awareness.' : scores.aptitude.spatial >= 2 ? 'Good sense of direction.' : 'Try small map/rotation puzzles.'}</p>` : ''}<p style="margin-top:8px">These are light snapshots—not grades. They show what clicked today, not limits.</p></div>`;
     const habitsScore = scores.habits;
     let habitsMessage = '';
     if (habitsScore <= 10) {
@@ -883,7 +909,7 @@ function showResults() {
     }
     html += `<div class="result-card"><h3>📖 Study Habits</h3><p>${habitsMessage}</p></div>`;
     if (tryNext.length) {
-        html += `<div class="result-card"><h3>🚀 ${slang('Ready to Try')}</h3><p>${slang('You said you\'re interested in trying:')}</p><ul>${tryNext.map(x=>`<li>${slang(x)}</li>`).join('')}</ul>${recommended ? `<p style="margin-top:10px;color:#667eea;"><strong>${slang('Quick win')}:</strong> ${slang(recommended)} — ${slang('pick a date, a buddy, and what "done" looks like.')}</p>` : ''}</div>`;
+        html += `<div class="result-card"><h3>🚀 Ready to Try</h3><p>You said you're interested in trying:</p><ul>${tryNext.map(x=>`<li>${x}</li>`).join('')}</ul>${recommended ? `<p style="margin-top:10px;color:#667eea;"><strong>Quick win:</strong> ${recommended} — pick a date, a buddy, and what "done" looks like.</p>` : ''}</div>`;
     }
     if (responses['O-REF-01'] || responses['O-REF-02'] || responses['O-REF-03']) {
         html += '<div class="result-card"><h3>💭 Your Reflections</h3>';
