@@ -3,80 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover your interests and aptitudes with this interactive exploration tool for teenagers. Get personalized activity suggestions and learn what you enjoy.">
-    <meta name="keywords" content="interest explorer, aptitude test, career exploration, teen interests, personality assessment">
-    <title>Interest & Aptitude Explorer | Discover Your Path</title>
+    <meta name="description" content="Discover your interests, strengths, and next-step ideas with this interactive explorer designed for teenagers.">
+    <meta name="keywords" content="interest explorer, aptitude test, teen interests, career exploration, student reflection">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="color-scheme" content="light dark">
+    <title>Interest &amp; Aptitude Explorer | Discover Your Path</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <button class="reset-button" onclick="resetTest()">Reset Test</button>
-            <div class="accent-swatches" aria-label="Theme">
-              <button class="swatch" data-theme="indigo" title="Indigo"></button>
-              <button class="swatch" data-theme="teal" title="Teal"></button>
-              <button class="swatch" data-theme="amber" title="Amber"></button>
-            </div>
-            <h1>Interest & Aptitude Explorer</h1>
-            <p>Explore what you enjoy. There aren't right answers.</p>
-            <div class="progress-bar">
-              <div class="progress-fill" id="progressBar"></div>
-              <span class="progress-pct" id="progressPct">0%</span>
-            </div>
-        </div>
-        <div class="content">
-            <div class="section active" id="welcome">
-                <div class="welcome-section">
-                    <h2>Welcome! 👋</h2>
-                    <p>This is your personal exploration tool—a friendly way to discover what interests you and what you might enjoy trying next.</p>
-                    <p><strong>How it works:</strong></p>
-                    <p>📝 Answer questions about what interests you<br>⏰ Takes about 20-25 minutes for the core (you can pause anytime)<br>🎯 Get personalized suggestions for activities to explore<br>🔒 Everything saves automatically as you go</p>
-                    <p style="color:var(--text-secondary);font-size:0.95em;margin-top:30px;">Remember: This is just for exploration—nothing here labels or tracks you. It's all about finding cool stuff you might want to try.</p>
-                    <p id="privacyNote" style="color:var(--text-secondary);font-size:0.95em;margin-top:10px;"><strong>Privacy:</strong> Your answers stay on this device (saved in your browser). You can reset, download, or import them anytime.</p>
-                    <button class="start-button" onclick="startTest()">Start Exploring</button>
-                    <button class="start-button" id="resumeBtn" style="display:none;margin-left:10px;" onclick="resumeTest()">Continue Where I Left Off</button>
+        <header class="header">
+            <div class="header-topline">
+                <div class="brand-pill" aria-label="Explorer studio brand">
+                    <span class="brand-icon">🧭</span>
+                    <div class="brand-copy">
+                        <span class="brand-name">Explorer Studio</span>
+                        <span class="brand-version">Teen edition</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="accent-swatches" aria-label="Choose accent theme">
+                        <button class="swatch" data-theme="indigo" title="Indigo"></button>
+                        <button class="swatch" data-theme="teal" title="Teal"></button>
+                        <button class="swatch" data-theme="amber" title="Amber"></button>
+                    </div>
+                    <button class="reset-button" onclick="resetTest()">Reset everything</button>
                 </div>
             </div>
+            <div class="header-body">
+                <div class="hero-text">
+                    <span class="hero-eyebrow">Confidence for curious minds</span>
+                    <h1>Interest &amp; Aptitude Explorer</h1>
+                    <p class="hero-description">A guided, zero-pressure studio built with educators and students to help you spot the activities, habits, and learning moves that light you up.</p>
+                    <ul class="hero-points">
+                        <li><span>⚡</span>Five short pulses to map interests, habits, and quick reasoning.</li>
+                        <li><span>🎯</span>Curate optional modules only when the topic feels right.</li>
+                        <li><span>🧠</span>Export ready-to-share notes for mentors, family, or future plans.</li>
+                    </ul>
+                </div>
+                <div class="hero-visual" aria-hidden="true">
+                    <div class="hero-graphic">
+                        <div class="hero-orb hero-orb--primary"></div>
+                        <div class="hero-orb hero-orb--secondary"></div>
+                        <div class="hero-spark hero-spark--one"></div>
+                        <div class="hero-spark hero-spark--two"></div>
+                        <div class="hero-emblem">
+                            <span class="hero-emblem-label">Teen tested</span>
+                            <span class="hero-emblem-value">2024 edition</span>
+                        </div>
+                    </div>
+                    <div class="progress-card">
+                        <div class="progress-card-header">
+                            <span class="progress-title">Live progress</span>
+                            <span class="progress-caption">Autosave is always on.</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar"></div>
+                            <span class="progress-pct" id="progressPct">0%</span>
+                        </div>
+                        <p class="progress-subtext">Core journey → optional modules → custom results.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="header-metrics">
+                <div class="metric-card">
+                    <span class="metric-label">Time commitment</span>
+                    <span class="metric-value">≈ 20-25 minutes</span>
+                    <span class="metric-hint">Take breaks whenever you need to.</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Choose your path</span>
+                    <span class="metric-value">Optional deep-dive modules</span>
+                    <span class="metric-hint">Select the ones that match your vibe.</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Your data</span>
+                    <span class="metric-value">Stored on this device</span>
+                    <span class="metric-hint">Reset or export anytime.</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <section class="section active" id="welcome">
+                <div class="welcome-section">
+                    <div class="welcome-intro">
+                        <h2>Welcome! 👋</h2>
+                        <p class="welcome-lead">This is your personal exploration studio—an interactive way to notice what energizes you and how you like to learn.</p>
+                    </div>
+                    <div class="welcome-grid">
+                        <div class="welcome-card">
+                            <span class="welcome-icon">🧭</span>
+                            <h3>Map your interests</h3>
+                            <p>Spot the activities, stories, and challenges that pull you in and deserve more of your time.</p>
+                        </div>
+                        <div class="welcome-card">
+                            <span class="welcome-icon">🚀</span>
+                            <h3>Build momentum</h3>
+                            <p>Mix quick questions with mini-scenarios so you can answer with confidence, not guesswork.</p>
+                        </div>
+                        <div class="welcome-card">
+                            <span class="welcome-icon">🤝</span>
+                            <h3>Share your wins</h3>
+                            <p>Export your takeaways for mentors, family, or future applications—only when you choose.</p>
+                        </div>
+                    </div>
+                    <div class="start-actions">
+                        <button class="start-button" onclick="startTest()">Start exploring</button>
+                        <button class="start-button ghost" id="resumeBtn" style="display:none;" onclick="resumeTest()">Continue where I left off</button>
+                    </div>
+                    <div class="privacy-card">
+                        <div class="privacy-icon">🔒</div>
+                        <div class="privacy-body">
+                            <p class="privacy-title">Remember: this space is for exploration—no grades, no labels.</p>
+                            <p id="privacyNote"><strong>Privacy:</strong> Your answers stay on this device. Reset, download, or import them whenever you like.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <div id="testSections"></div>
-            <div class="section" id="moduleSelection">
+
+            <section class="section" id="moduleSelection">
                 <div class="module-selector">
-                    <h2>Optional Modules</h2>
-                    <p>Pick any modules you want, or skip straight to your results.</p>
+                    <div class="module-intro">
+                        <h2>Optional modules</h2>
+                        <p>Choose any extras that match your curiosity—or skip ahead to your results.</p>
+                        <div class="module-callout">
+                            <span class="module-badge">Curate your own mix</span>
+                            <p>Each module adds bonus insights and tailored prompts. You can return for more anytime.</p>
+                        </div>
+                    </div>
                     <div class="module-options">
-                        <div class="module-card" onclick="toggleModule('humanities')" id="module-humanities"><h4>Humanities</h4><p>Literature, History, Languages, Arts & Media</p><div class="module-time">~10-15 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('visual')" id="module-visual"><h4>Visual-Spatial & Mapping</h4><p>Spatial reasoning and navigation puzzles</p><div class="module-time">~8 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('maker')" id="module-maker"><h4>Maker & Tech</h4><p>Hands-on building and technology</p><div class="module-time">~6 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('creative')" id="module-creative"><h4>Creative</h4><p>Quick creative writing exercises</p><div class="module-time">~4 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('community')" id="module-community"><h4>Community & Leadership</h4><p>Working with others and leading projects</p><div class="module-time">~5 minutes</div></div>
-                        <div class="module-card" onclick="toggleModule('reflection')" id="module-reflection"><h4>Reflection</h4><p>Think about what you want to try next</p><div class="module-time">~3 minutes</div></div>
+                        <div class="module-card" onclick="toggleModule('humanities')" id="module-humanities">
+                            <span class="module-icon">📚</span>
+                            <div class="module-content">
+                                <h4>Humanities</h4>
+                                <p>Literature, history, languages, arts &amp; media</p>
+                                <div class="module-time">~10-15 minutes</div>
+                            </div>
+                        </div>
+                        <div class="module-card" onclick="toggleModule('visual')" id="module-visual">
+                            <span class="module-icon">🗺️</span>
+                            <div class="module-content">
+                                <h4>Visual-Spatial &amp; Mapping</h4>
+                                <p>Spatial reasoning and navigation puzzles</p>
+                                <div class="module-time">~8 minutes</div>
+                            </div>
+                        </div>
+                        <div class="module-card" onclick="toggleModule('maker')" id="module-maker">
+                            <span class="module-icon">🛠️</span>
+                            <div class="module-content">
+                                <h4>Maker &amp; Tech</h4>
+                                <p>Hands-on building and technology</p>
+                                <div class="module-time">~6 minutes</div>
+                            </div>
+                        </div>
+                        <div class="module-card" onclick="toggleModule('creative')" id="module-creative">
+                            <span class="module-icon">🎨</span>
+                            <div class="module-content">
+                                <h4>Creative</h4>
+                                <p>Quick creative writing exercises</p>
+                                <div class="module-time">~4 minutes</div>
+                            </div>
+                        </div>
+                        <div class="module-card" onclick="toggleModule('community')" id="module-community">
+                            <span class="module-icon">🤝</span>
+                            <div class="module-content">
+                                <h4>Community &amp; Leadership</h4>
+                                <p>Working with others and leading projects</p>
+                                <div class="module-time">~5 minutes</div>
+                            </div>
+                        </div>
+                        <div class="module-card" onclick="toggleModule('reflection')" id="module-reflection">
+                            <span class="module-icon">🪞</span>
+                            <div class="module-content">
+                                <h4>Reflection</h4>
+                                <p>Think about what you want to try next</p>
+                                <div class="module-time">~3 minutes</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="module-nav">
-                        <button class="nav-button secondary" onclick="skipModules()">Skip to Results</button>
-                        <button class="nav-button" onclick="startModules()">Continue with Selected →</button>
+                        <button class="nav-button secondary" onclick="skipModules()">Skip to results</button>
+                        <button class="nav-button" onclick="startModules()">Continue with selected →</button>
                     </div>
                 </div>
-            </div>
-            <div class="section" id="results">
+            </section>
+
+            <section class="section" id="results">
                 <div class="results-section">
-                    <h2>Your Results</h2>
+                    <div class="results-intro">
+                        <h2>Your results</h2>
+                        <p>See the interests, habits, and ideas you surfaced. Download your notes or share highlights with someone who supports your next step.</p>
+                    </div>
                     <div id="resultsContent"></div>
                     <div class="result-tools">
-                      <button class="tool-button" onclick="generateParentBrief()">Parent brief</button>
-                      <button class="tool-button" onclick="downloadJSON()">Export JSON</button>
-                      <button class="tool-button" onclick="downloadCSV()">Export CSV</button>
-                      <button class="tool-button" onclick="downloadItemBank()">Download item bank</button>
-
-                      <label class="tool-upload">
-                        <input type="file" id="importFile" accept="application/json" onchange="importJSON(this.files[0])">
-                        Import JSON
-                      </label>
+                        <button class="tool-button" onclick="generateParentBrief()">Parent brief</button>
+                        <button class="tool-button" onclick="downloadJSON()">Export JSON</button>
+                        <button class="tool-button" onclick="downloadCSV()">Export CSV</button>
+                        <button class="tool-button" onclick="downloadItemBank()">Download item bank</button>
+                        <label class="tool-upload">
+                            <input type="file" id="importFile" accept="application/json" onchange="importJSON(this.files[0])">
+                            Import JSON
+                        </label>
                     </div>
-                    <button class="print-button" onclick="printResults()">Print/Save Results</button>
-                    <button class="print-button" onclick="addMoreModules()">Add optional modules</button>
+                    <div class="results-actions">
+                        <button class="print-button" onclick="printResults()">Print or save results</button>
+                        <button class="print-button ghost" onclick="addMoreModules()">Add optional modules</button>
+                    </div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
+
     <div class="save-indicator" id="saveIndicator">Progress saved ✓</div>
     <script src="assets/js/testData.js"></script>
     <script src="assets/js/app.js"></script>
