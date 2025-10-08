@@ -25,25 +25,6 @@ if (localStorage.getItem('explorerSubsectionIndex')) {
     currentSubsectionIndex = parseInt(localStorage.getItem('explorerSubsectionIndex'));
 }
 
-const THEMES = {
-  indigo:{accent:'#6366f1',accent600:'#4f46e5',accent100:'#eef2ff'},
-  teal:{accent:'#14b8a6',accent600:'#0d9488',accent100:'#ccfbf1'},
-  amber:{accent:'#f59e0b',accent600:'#d97706',accent100:'#fef3c7'}
-};
-
-function setTheme(name){
-  const t = THEMES[name] || THEMES.indigo;
-  Object.entries(t).forEach(([k,v])=>document.documentElement.style.setProperty(`--${k}`, v));
-  localStorage.setItem('explorerTheme', name);
-  document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active', b.dataset.theme===name));
-}
-
-(function initTheme(){
-  const saved = localStorage.getItem('explorerTheme') || 'indigo';
-  setTheme(saved);
-  document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click', ()=>setTheme(b.dataset.theme)));
-})();
-
 // Show resume button if there's saved progress
 document.addEventListener('DOMContentLoaded', () => {
     const hasProgress = Object.keys(responses).length > 0 || currentSection > 0 || selectedModules.length > 0;
