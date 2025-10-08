@@ -7,22 +7,22 @@ let currentModuleIndex = 0;
 let currentSubsectionIndex = 0;
 
 // Phase tracking for resume functionality
-let phase = localStorage.getItem('levonPhase') || 'core';
-let storedModules = JSON.parse(localStorage.getItem('levonSelectedModules') || '[]');
+let phase = localStorage.getItem('explorerPhase') || 'core';
+let storedModules = JSON.parse(localStorage.getItem('explorerSelectedModules') || '[]');
 if (storedModules.length && !selectedModules.length) selectedModules = storedModules;
 
 // Initialize from localStorage if exists
-if (localStorage.getItem('levonTestResponses')) {
-    responses = JSON.parse(localStorage.getItem('levonTestResponses'));
+if (localStorage.getItem('explorerTestResponses')) {
+    responses = JSON.parse(localStorage.getItem('explorerTestResponses'));
 }
-if (localStorage.getItem('levonTestSection')) {
-    currentSection = parseInt(localStorage.getItem('levonTestSection'));
+if (localStorage.getItem('explorerTestSection')) {
+    currentSection = parseInt(localStorage.getItem('explorerTestSection'));
 }
-if (localStorage.getItem('levonModuleIndex')) {
-    currentModuleIndex = parseInt(localStorage.getItem('levonModuleIndex'));
+if (localStorage.getItem('explorerModuleIndex')) {
+    currentModuleIndex = parseInt(localStorage.getItem('explorerModuleIndex'));
 }
-if (localStorage.getItem('levonSubsectionIndex')) {
-    currentSubsectionIndex = parseInt(localStorage.getItem('levonSubsectionIndex'));
+if (localStorage.getItem('explorerSubsectionIndex')) {
+    currentSubsectionIndex = parseInt(localStorage.getItem('explorerSubsectionIndex'));
 }
 
 const THEMES = {
@@ -34,12 +34,12 @@ const THEMES = {
 function setTheme(name){
   const t = THEMES[name] || THEMES.indigo;
   Object.entries(t).forEach(([k,v])=>document.documentElement.style.setProperty(`--${k}`, v));
-  localStorage.setItem('levonTheme', name);
+  localStorage.setItem('explorerTheme', name);
   document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active', b.dataset.theme===name));
 }
 
 (function initTheme(){
-  const saved = localStorage.getItem('levonTheme') || 'indigo';
+  const saved = localStorage.getItem('explorerTheme') || 'indigo';
   setTheme(saved);
   document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click', ()=>setTheme(b.dataset.theme)));
 })();
@@ -69,12 +69,12 @@ function resumeTest() {
 
 function savePhase(newPhase) {
     phase = newPhase;
-    localStorage.setItem('levonPhase', newPhase);
+    localStorage.setItem('explorerPhase', newPhase);
 }
 
 function saveModuleCursor() {
-    localStorage.setItem('levonModuleIndex', String(currentModuleIndex));
-    localStorage.setItem('levonSubsectionIndex', String(currentSubsectionIndex));
+    localStorage.setItem('explorerModuleIndex', String(currentModuleIndex));
+    localStorage.setItem('explorerSubsectionIndex', String(currentSubsectionIndex));
 }
 
 // Validation helpers
@@ -150,12 +150,12 @@ function validateCurrentOptionalPage() {
 
 function resetTest() {
     if (!confirm('This will clear ALL responses, selected modules, and progress. Ready to start fresh?')) return;
-    localStorage.removeItem('levonTestResponses');
-    localStorage.removeItem('levonTestSection');
-    localStorage.removeItem('levonSelectedModules');
-    localStorage.removeItem('levonPhase');
-    localStorage.removeItem('levonModuleIndex');
-    localStorage.removeItem('levonSubsectionIndex');
+    localStorage.removeItem('explorerTestResponses');
+    localStorage.removeItem('explorerTestSection');
+    localStorage.removeItem('explorerSelectedModules');
+    localStorage.removeItem('explorerPhase');
+    localStorage.removeItem('explorerModuleIndex');
+    localStorage.removeItem('explorerSubsectionIndex');
     responses = {};
     currentSection = 0;
     selectedModules = [];
@@ -196,7 +196,7 @@ function toggleModule(moduleId) {
         selectedModules.push(moduleId);
         card.classList.add('selected');
     }
-    localStorage.setItem('levonSelectedModules', JSON.stringify(selectedModules));
+    localStorage.setItem('explorerSelectedModules', JSON.stringify(selectedModules));
 }
 
 function skipModules() {
@@ -529,9 +529,9 @@ function saveShortAnswer(questionId) {
 }
 
 function saveProgress() {
-    localStorage.setItem('levonTestResponses', JSON.stringify(responses));
-    localStorage.setItem('levonTestSection', currentSection.toString());
-    localStorage.setItem('levonSelectedModules', JSON.stringify(selectedModules));
+    localStorage.setItem('explorerTestResponses', JSON.stringify(responses));
+    localStorage.setItem('explorerTestSection', currentSection.toString());
+    localStorage.setItem('explorerSelectedModules', JSON.stringify(selectedModules));
     const indicator = document.getElementById('saveIndicator');
     indicator.classList.add('show');
     setTimeout(() => {
@@ -746,7 +746,7 @@ function downloadJSON() {
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'levon_orientation_results.json';
+    a.download = 'interest_aptitude_results.json';
     a.click();
     URL.revokeObjectURL(a.href);
 }
@@ -764,7 +764,7 @@ function downloadCSV() {
     const blob = new Blob([rows.join('\n')], {type:'text/csv'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'levon_orientation_results.csv';
+    a.download = 'interest_aptitude_results.csv';
     a.click();
     URL.revokeObjectURL(a.href);
 }
@@ -785,11 +785,11 @@ function importJSON(arg) {
       const data = JSON.parse(reader.result);
       if (data.responses) {
         responses = data.responses;
-        localStorage.setItem('levonTestResponses', JSON.stringify(responses));
+        localStorage.setItem('explorerTestResponses', JSON.stringify(responses));
       }
       if (Array.isArray(data.selectedModules)) {
         selectedModules = data.selectedModules;
-        localStorage.setItem('levonSelectedModules', JSON.stringify(selectedModules));
+        localStorage.setItem('explorerSelectedModules', JSON.stringify(selectedModules));
       }
       if (typeof data.phase === 'string') {
         savePhase(data.phase);
@@ -814,7 +814,7 @@ function importJSON(arg) {
 
 function downloadItemBank() {
   const bank = {
-    title: "Career & Interest Explorer - Item Bank",
+    title: "Interest & Aptitude Orientation",
     version: "1.0",
     scales: {
       interest5: ["Not at all","A little","Somewhat","Very","Super interested"],
@@ -851,7 +851,7 @@ function downloadItemBank() {
   const blob = new Blob([JSON.stringify(bank, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "levon_item_bank.json";
+  a.download = "interest_aptitude_item_bank.json";
   a.click();
   URL.revokeObjectURL(a.href);
 }
