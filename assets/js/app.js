@@ -814,7 +814,7 @@ function importJSON(arg) {
 
 function downloadItemBank() {
   const bank = {
-    title: "Levon Interest & Aptitude Orientation",
+    title: "Career & Interest Explorer - Item Bank",
     version: "1.0",
     scales: {
       interest5: ["Not at all","A little","Somewhat","Very","Super interested"],
