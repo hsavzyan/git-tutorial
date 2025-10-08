@@ -30,6 +30,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const hasProgress = Object.keys(responses).length > 0 || currentSection > 0 || selectedModules.length > 0;
     const resumeBtn = document.getElementById('resumeBtn');
     if (resumeBtn) resumeBtn.style.display = hasProgress ? 'inline-block' : 'none';
+
+    const testSectionsContainer = document.getElementById('testSections');
+    if (testSectionsContainer) {
+        testSectionsContainer.addEventListener('click', (event) => {
+            const option = event.target.closest('.scale-option, .mcq-option');
+            if (!option || !testSectionsContainer.contains(option)) return;
+            activateOption(option);
+        });
+
+        testSectionsContainer.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            const option = event.target.closest('.scale-option, .mcq-option');
+            if (!option || !testSectionsContainer.contains(option)) return;
+            event.preventDefault();
+            activateOption(option);
+        });
+    }
 });
 
 // Resume test function
@@ -198,6 +215,35 @@ function startModules() {
     renderOptionalModule();
 }
 
+function updateOptionState(container, questionId, value) {
+    const scope = container || document;
+    const group = scope.querySelector(`.question-group[data-qid="${questionId}"]`);
+    if (!group) return;
+    const targetValue = Number(value);
+    const options = group.querySelectorAll('.scale-option, .mcq-option');
+    options.forEach(option => {
+        const optionValue = Number(option.dataset.value);
+        const isSelected = optionValue === targetValue;
+        option.classList.toggle('selected', isSelected);
+        option.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+    });
+}
+
+function activateOption(option) {
+    const group = option.closest('.question-group');
+    if (!group) return;
+    const questionId = group.dataset.qid;
+    if (!questionId) return;
+    const value = Number(option.dataset.value);
+    if (Number.isNaN(value)) return;
+
+    if (option.classList.contains('scale-option')) {
+        selectScale(questionId, value);
+    } else if (option.classList.contains('mcq-option')) {
+        selectMCQ(questionId, value);
+    }
+}
+
 function renderOptionalModule() {
     const container = document.getElementById('testSections');
     container.innerHTML = '';
@@ -226,9 +272,8 @@ function renderOptionalModule() {
                     const isSelected = responses[q.id] === idx;
                     html += `
                             <div class="scale-option ${isSelected ? 'selected' : ''}"
-                                 tabindex="0" role="radio" aria-checked="${isSelected}"
-                                 onclick="selectScale('${q.id}', ${idx})"
-                                 onkeydown="if(event.key==='Enter'||event.key===' '){selectScale('${q.id}', ${idx})}">${label}</div>
+                                 tabindex="0" role="radio" aria-checked="${isSelected ? 'true' : 'false'}"
+                                 data-value="${idx}">${label}</div>
                     `;
                 });
                 html += `</div></div>`;
@@ -246,9 +291,8 @@ function renderOptionalModule() {
                 const isSelected = responses[q.id] === idx;
                 html += `
                         <div class="mcq-option ${isSelected ? 'selected' : ''}"
-                             tabindex="0" role="radio" aria-checked="${isSelected}"
-                             onclick="selectMCQ('${q.id}', ${idx})"
-                             onkeydown="if(event.key==='Enter'||event.key===' '){selectMCQ('${q.id}', ${idx})}">
+                             tabindex="0" role="radio" aria-checked="${isSelected ? 'true' : 'false'}"
+                             data-value="${idx}">
                             <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
                             <span>${opt}</span>
                         </div>
@@ -272,9 +316,8 @@ function renderOptionalModule() {
                 const isSelected = responses[q.id] === idx;
                 html += `
                         <div class="mcq-option ${isSelected ? 'selected' : ''}"
-                             tabindex="0" role="radio" aria-checked="${isSelected}"
-                             onclick="selectMCQ('${q.id}', ${idx})"
-                             onkeydown="if(event.key==='Enter'||event.key===' '){selectMCQ('${q.id}', ${idx})}">
+                             tabindex="0" role="radio" aria-checked="${isSelected ? 'true' : 'false'}"
+                             data-value="${idx}">
                             <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
                             <span>${opt}</span>
                         </div>
@@ -313,9 +356,8 @@ function renderOptionalModule() {
                 const isSelected = responses[q.id] === idx;
                 html += `
                         <div class="scale-option ${isSelected ? 'selected' : ''}"
-                             tabindex="0" role="radio" aria-checked="${isSelected}"
-                             onclick="selectScale('${q.id}', ${idx})"
-                             onkeydown="if(event.key==='Enter'||event.key===' '){selectScale('${q.id}', ${idx})}">${label}</div>
+                             tabindex="0" role="radio" aria-checked="${isSelected ? 'true' : 'false'}"
+                             data-value="${idx}">${label}</div>
                 `;
             });
             html += `</div></div>`;
@@ -438,9 +480,8 @@ function renderSection() {
                 const isSelected = responses[q.id] === idx;
                 html += `
                         <div class="mcq-option ${isSelected ? 'selected' : ''}"
-                             tabindex="0" role="radio" aria-checked="${isSelected}"
-                             onclick="selectMCQ('${q.id}', ${idx})"
-                             onkeydown="if(event.key==='Enter'||event.key===' '){selectMCQ('${q.id}', ${idx})}">
+                             tabindex="0" role="radio" aria-checked="${isSelected ? 'true' : 'false'}"
+                             data-value="${idx}">
                             <span class="mcq-option-letter">${String.fromCharCode(65 + idx)}</span>
                             <span>${opt}</span>
                         </div>
@@ -460,9 +501,8 @@ function renderSection() {
                 const isSelected = responses[q.id] === idx;
                 html += `
                         <div class="scale-option ${isSelected ? 'selected' : ''}"
-                             tabindex="0" role="radio" aria-checked="${isSelected}"
-                             onclick="selectScale('${q.id}', ${idx})"
-                             onkeydown="if(event.key==='Enter'||event.key===' '){selectScale('${q.id}', ${idx})}">${label}</div>
+                             tabindex="0" role="radio" aria-checked="${isSelected ? 'true' : 'false'}"
+                             data-value="${idx}">${label}</div>
                 `;
             });
             html += `</div></div>`;
@@ -486,20 +526,32 @@ function renderSection() {
 function selectScale(questionId, value) {
     responses[questionId] = value;
     saveProgress();
+    const container = document.getElementById('testSections');
+    updateOptionState(container, questionId, value);
+    if (container) {
+        const group = container.querySelector(`.question-group[data-qid="${questionId}"]`);
+        if (group) group.classList.remove('unanswered');
+    }
     if (inOptionalModules) {
-        renderOptionalModule();
+        updateModuleProgress();
     } else {
-        renderSection();
+        updateProgress();
     }
 }
 
 function selectMCQ(questionId, value) {
     responses[questionId] = value;
     saveProgress();
+    const container = document.getElementById('testSections');
+    updateOptionState(container, questionId, value);
+    if (container) {
+        const group = container.querySelector(`.question-group[data-qid="${questionId}"]`);
+        if (group) group.classList.remove('unanswered');
+    }
     if (inOptionalModules) {
-        renderOptionalModule();
+        updateModuleProgress();
     } else {
-        renderSection();
+        updateProgress();
     }
 }
 
@@ -1077,6 +1129,7 @@ window.previousModule = previousModule;
 window.nextModule = nextModule;
 window.selectScale = selectScale;
 window.selectMCQ = selectMCQ;
+window.updateOptionState = updateOptionState;
 window.saveShortAnswer = saveShortAnswer;
 window.previousSection = previousSection;
 window.nextSection = nextSection;
